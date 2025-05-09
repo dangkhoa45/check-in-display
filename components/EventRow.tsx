@@ -1,6 +1,10 @@
 import { CheckInOutEvent } from "@/types/checkInOutEvent";
 
-export default function EventRow({ event }: { event: CheckInOutEvent }) {
+interface Props {
+  event: CheckInOutEvent;
+}
+
+export default function EventRow({ event }: Props) {
   let bgColor = "bg-gray-900";
   let statusColor = "bg-green-500";
 
