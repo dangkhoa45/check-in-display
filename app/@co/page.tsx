@@ -1,51 +1,25 @@
 "use client";
 
 import EventRow from "@/components/EventRow";
-import {
-  CheckInOutEvent,
-  initialCheckIns,
-  newCheckIns,
-} from "@/types/checkInOutEvent";
-import { useEffect, useState } from "react";
+import { useCheckInOutList } from "@/hooks/useCheckInOutList";
 
 export default function CheckOutList() {
-  const [checkOuts, setCheckOuts] =
-    useState<CheckInOutEvent[]>(initialCheckIns);
-  const [index, setIndex] = useState<number>(0);
+  const { data, loading, error } = useCheckInOutList({ type: "OUT" });
 
-  useEffect(() => {
-    if (index >= newCheckIns.length) return;
-
-    const interval = setInterval(() => {
-      const newEvent: CheckInOutEvent = {
-        ...newCheckIns[index],
-        isNew: true,
-      };
-
-      setCheckOuts((prev: CheckInOutEvent[]) => [
-        newEvent,
-        ...prev.slice(0, 2),
-      ]);
-
-      setIndex((i) => i + 1);
-
-      setTimeout(() => {
-        setCheckOuts((prev: CheckInOutEvent[]) =>
-          prev.map((e: CheckInOutEvent) =>
-            e.id === newEvent.id ? { ...e, isNew: false } : e
-          )
-        );
-      }, 15000);
-    }, 45000);
-
-    return () => clearInterval(interval);
-  }, [index]);
+  if (error) return <p className="text-red-500">Lỗi: {error}</p>;
 
   return (
-    <>
-      {checkOuts.map((event: CheckInOutEvent) => (
-        <EventRow key={event.id} event={event} />
-      ))}
-    </>
+    <div className="flex flex-col justify-between h-full">
+      {loading && (
+        <div className="text-center text-sm text-gray-400">
+          Đang tải dữ liệu...
+        </div>
+      )}
+      <div className="min-h-[320px]">
+        {data.map((item) => (
+          <EventRow key={item.name} event={item} />
+        ))}
+      </div>
+    </div>
   );
 }

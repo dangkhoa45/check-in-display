@@ -5,71 +5,76 @@ interface Props {
 }
 
 export default function EventRow({ event }: Props) {
+  const ppeItems = {
+    giay: Boolean(event.custom_is_boots),
+    gangtay: Boolean(event.custom_is_gloves),
+    aophanquang: Boolean(event.custom_is_vest),
+  };
+
+  const labelMap: Record<string, string> = {
+    giay: "Giày",
+    gangtay: "Găng tay",
+    aophanquang: "Áo phản quang",
+  };
+
+  const ppeStatus = Object.values(ppeItems).every(Boolean) ? "Đầy đủ" : "Thiếu";
+
+  const statusMessage =
+    ppeStatus === "Đầy đủ" ? "Check-in thành công" : "Thiếu đồ bảo hộ";
+
   let bgColor = "bg-gray-900";
   let statusColor = "bg-green-500";
 
-  if (event.ppeStatus === "Thiếu") {
+  if (ppeStatus === "Thiếu") {
     bgColor = "bg-orange-500 bg-opacity-30";
     statusColor = "bg-orange-500";
-  } else if (event.statusMessage === "Không xác định") {
-    bgColor = "bg-red-600 bg-opacity-30";
-    statusColor = "bg-red-600";
-  }
-
-  if (event.isNew) {
-    bgColor = "bg-yellow-100 bg-opacity-20";
   }
 
   const renderPPEStatus = (ppeItems: any) => (
-    <div className="bg-gray-800 bg-opacity-80 p-1 rounded mt-1">
-      <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-        {Object.entries(ppeItems).map(([key, value]) => (
-          <div key={key} className="flex items-center gap-1">
-            <div
-              className={`w-3 h-3 rounded-full ${
-                value ? "bg-green-500" : "bg-red-500"
-              }`}
-            ></div>
-            <span className="text-xs capitalize">{key}</span>
-          </div>
-        ))}
-      </div>
+    <div className="flex flex-wrap gap-2 mt-1">
+      {Object.entries(ppeItems).map(([key, value]) => (
+        <div
+          key={key}
+          className="flex items-center gap-1 px-1 py-0.5 rounded text-xs"
+        >
+          <div
+            className={`w-2.5 h-2.5 rounded-full ${
+              value ? "bg-green-500" : "bg-red-500"
+            }`}
+          />
+          <span>{labelMap[key] || key}</span>
+        </div>
+      ))}
     </div>
   );
+
+  const formattedTime = new Date(event.time).toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
   return (
     <div
       className={`${bgColor} text-white p-2 border-b border-gray-800 flex items-center transition-colors duration-500`}
     >
-      <div className="w-1/6 text-base font-mono">{event.timestamp}</div>
+      <div className="w-1/6 text-base font-mono">{formattedTime}</div>
       <div className="w-5/6 flex items-center gap-3">
-        <div className="relative">
+        <div className="relative w-24 h-24">
           <img
-            src={event.avatar || "/placeholder.svg"}
-            alt={event.employeeName}
-            className={`w-24 h-24 rounded-full object-cover ${
-              event.statusMessage === "Không xác định"
-                ? "border-4 border-red-500"
-                : ""
+            src={event.custom_image || "/placeholder.svg"}
+            alt={event.employee_name}
+            className="w-22 h-22 rounded-full object-cover"
+          />
+          <div
+            className={`absolute -bottom-0.5 right-3 w-5 h-5 rounded-full border-2 border-gray-900 ${
+              ppeStatus === "Đầy đủ" ? "bg-green-500" : "bg-orange-500"
             }`}
           />
-          {event.statusMessage === "Không xác định" && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-5xl font-bold text-red-500">X</div>
-            </div>
-          )}
-          <div
-            className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${statusColor} border-2 border-gray-900`}
-          ></div>
         </div>
         <div className="flex flex-col">
-          <div className="font-bold text-xl">{event.employeeName}</div>
-          {event.ppeStatus === "Thiếu" && renderPPEStatus(event.ppeItems)}
-          {event.statusMessage === "Không xác định" && (
-            <div className="text-base font-medium bg-red-700 px-2 py-0.5 rounded inline-block mt-1">
-              Cảnh báo: Người lạ
-            </div>
-          )}
+          <div className="font-bold text-xl">{event.employee_name}</div>
+          {ppeStatus === "Thiếu" && renderPPEStatus(ppeItems)}
         </div>
       </div>
     </div>

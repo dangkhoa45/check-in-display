@@ -1,52 +1,35 @@
 export type CheckInOutEvent = {
-  id: number;
-  timestamp: string;
-  employeeName: string;
-  statusMessage: string;
-  ppeStatus: string;
-  ppeItems: {
-    mu: boolean;
-    giay: boolean;
-    gangtay: boolean;
-    aophanquang: boolean;
-  };
-  isNew: boolean;
-  avatar: string;
+  name: string;
+  owner: string;
+  creation: string;
+  modified: string;
+  modified_by: string;
+  docstatus: number;
+  idx: number;
+  employee: string;
+  employee_name: string;
+  log_type: "IN" | "OUT";
+  shift: string;
+  custom_image: string | null;
+  custom_is_vest: 0 | 1;
+  custom_is_gloves: 0 | 1;
+  custom_is_boots: 0 | 1;
+  time: string;
+  device_id: string;
+  skip_auto_attendance: 0 | 1;
+  attendance: string | null;
+  custom_late_by: number | null;
+  custom_early_by: number | null;
+  latitude: number;
+  longitude: number;
+  geolocation: any;
+  shift_start: string | null;
+  shift_end: string | null;
+  offshift: 0 | 1;
+  shift_actual_start: string | null;
+  shift_actual_end: string | null;
 };
 
-export const initialCheckIns: CheckInOutEvent[] = [
-  {
-    id: 1,
-    timestamp: "13:17:20",
-    employeeName: "Bùi Kim Tiến Điền",
-    statusMessage: "Check-in thành công",
-    ppeStatus: "Đầy đủ",
-    ppeItems: {
-      mu: true,
-      giay: true,
-      gangtay: true,
-      aophanquang: true,
-    },
-    isNew: false,
-    avatar: "/placeholder.svg?height=120&width=120",
-  },
-  // thêm các check-ins khác nếu cần
-];
+export const initialCheckIns: CheckInOutEvent[] = [];
 
-export const newCheckIns: CheckInOutEvent[] = [
-  {
-    id: 4,
-    timestamp: "13:20:22",
-    employeeName: "Phan Văn Quân",
-    statusMessage: "Thiếu đồ bảo hộ",
-    ppeStatus: "Thiếu",
-    ppeItems: {
-      mu: false,
-      giay: true,
-      gangtay: true,
-      aophanquang: false,
-    },
-    isNew: true,
-    avatar: "/placeholder.svg?height=120&width=120",
-  },
-];
+export const newCheckIns: CheckInOutEvent[] = [];
