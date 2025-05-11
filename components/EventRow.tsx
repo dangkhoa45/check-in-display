@@ -62,9 +62,12 @@ export default function EventRow({ event }: Props) {
       <div className="w-5/6 flex items-center gap-3">
         <div className="relative w-24 h-24">
           <img
-            src={event.custom_image || "/placeholder.svg"}
+            src={
+              `https://dev4.tadalabs.vn/${event.custom_image}` ||
+              "/placeholder.svg"
+            }
             alt={event.employee_name}
-            className="w-22 h-22 rounded-full object-cover"
+            className="w-24 h-24 rounded-full object-cover transform rotate-90"
           />
           <div
             className={`absolute -bottom-0.5 right-3 w-5 h-5 rounded-full border-2 border-gray-900 ${
