@@ -1,10 +1,12 @@
 import { CheckInOutEvent } from "@/types/checkInOutEvent";
 
 interface Props {
-  event: CheckInOutEvent;
+  event: CheckInOutEvent & { is_unknown?: boolean };
 }
 
 export default function EventRow({ event }: Props) {
+  const isUnknown = event.is_unknown;
+
   const ppeItems = {
     giay: Boolean(event.custom_is_boots),
     gangtay: Boolean(event.custom_is_gloves),
@@ -28,6 +30,11 @@ export default function EventRow({ event }: Props) {
   if (ppeStatus === "Thiếu") {
     bgColor = "bg-orange-500 bg-opacity-30";
     statusColor = "bg-orange-500";
+  }
+
+  if (isUnknown) {
+    bgColor = "bg-red-600 bg-opacity-30";
+    statusColor = "bg-red-600";
   }
 
   const renderPPEStatus = (ppeItems: any) => (
@@ -79,6 +86,12 @@ export default function EventRow({ event }: Props) {
           <div className="font-bold text-xl">{event.employee_name}</div>
           {ppeStatus === "Thiếu" && renderPPEStatus(ppeItems)}
         </div>
+
+        {isUnknown && (
+          <div className="text-sm bg-red-700 px-2 py-0.5 rounded mt-1 inline-block">
+            🚨 Cảnh báo: Người lạ
+          </div>
+        )}
       </div>
     </div>
   );

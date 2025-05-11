@@ -1,24 +1,13 @@
 "use client";
 
 import EventRow from "@/components/EventRow";
-import { useCheckInOutList } from "@/hooks/useCheckInOutList";
-import { useEmployees } from "@/hooks/useEmployeeList";
+import { useRealtimeEventData } from "@/hooks/useRealtimeEventData";
 
 export default function CheckInList() {
-  const { data, loading, error, page, setPage, totalPages } = useCheckInOutList(
-    { type: "IN" }
-  );
-  const { data: employees } = useEmployees();
+  const { data, loading, error } = useRealtimeEventData({ type: "IN" });
+  
 
   if (error) return <p className="text-red-500">Lỗi: {error}</p>;
-
-  const mappedData = data.map((event) => {
-    const matched = employees.find((emp) => emp.name === event.employee);
-    return {
-      ...event,
-      custom_image: matched?.custom_face_images1 || "/placeholder.svg",
-    };
-  });
 
   return (
     <div className="flex flex-col justify-between h-full">
@@ -28,7 +17,7 @@ export default function CheckInList() {
         </div>
       )}
       <div className="min-h-[320px]">
-        {mappedData.map((item) => (
+        {data.map((item) => (
           <EventRow key={item.name} event={item} />
         ))}
       </div>
