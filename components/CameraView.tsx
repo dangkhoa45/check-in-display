@@ -1,12 +1,10 @@
 "use client";
-
-import { useCameraData } from "@/hooks/useCameraData";
 import { useEffect, useRef, useState } from "react";
 
 interface CameraViewProps {
-  cameraId: string;
-  location: string;
-  code: string;
+  cameraId?: string;
+  code?: string;
+  location?: string;
 }
 
 export default function CameraView({
@@ -14,61 +12,77 @@ export default function CameraView({
   location,
   code,
 }: CameraViewProps) {
-  const { faces } = useCameraData(cameraId);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 640, height: 480 });
+  const streamUrl = `http://103.82.134.252:8083/stream/${cameraId}/channel/0/webrtc`;
+  const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
-    const resize = () => {
-      if (videoRef.current) {
-        setDimensions({
-          width: videoRef.current.clientWidth,
-          height: videoRef.current.clientHeight,
-        });
-      }
-    };
-    resize();
-    window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
-  }, []);
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
 
-  // useEffect(() => {
-  //   const videoEl = videoRef.current;
-  //   if (!videoEl) return;
+    function startPlay(videoEl: HTMLVideoElement, url: string) {
+      const webrtc = new RTCPeerConnection({
+        iceServers: [
+          {
+            urls: ["stun:stun.l.google.com:19302"],
+          },
+        ],
+      });
 
-  //   const webrtc = new RTCPeerConnection({
-  //     iceServers: [{ urls: ["stun:stun.l.google.com:19302"] }],
-  //   });
+      webrtc.ontrack = function (event) {
+        console.log(event.streams.length + " track is delivered");
+        videoEl.srcObject = event.streams[0];
+        videoEl.play();
+      };
 
-  //   webrtc.addTransceiver("video", { direction: "recvonly" });
+      webrtc.addTransceiver("video", { direction: "sendrecv" });
 
-  //   webrtc.ontrack = (event) => {
-  //     videoEl.srcObject = event.streams[0];
-  //   };
+      webrtc.onnegotiationneeded = async function () {
+        const offer = await webrtc.createOffer();
+        await webrtc.setLocalDescription(offer);
 
-  //   webrtc.onnegotiationneeded = async () => {
-  //     const offer = await webrtc.createOffer();
-  //     await webrtc.setLocalDescription(offer);
+        fetch(url, {
+          method: "POST",
+          body: new URLSearchParams({
+            data: btoa(webrtc.localDescription?.sdp || ""),
+          }),
+        })
+          .then((res) => res.text())
+          .then((data) => {
+            try {
+              webrtc.setRemoteDescription(
+                new RTCSessionDescription({
+                  type: "answer",
+                  sdp: atob(data),
+                })
+              );
+            } catch (e) {
+              console.warn("Set remote description failed", e);
+            }
+          });
+      };
 
-  //     const response = await fetch(
-  //       `https://your-backend.com/webrtc/${cameraId}`,
-  //       {
-  //         method: "POST",
-  //         body: new URLSearchParams({ data: btoa(offer.sdp || "") }),
-  //       }
-  //     );
-  //     const answer = await response.text();
-  //     await webrtc.setRemoteDescription(
-  //       new RTCSessionDescription({ type: "answer", sdp: atob(answer) })
-  //     );
-  //   };
+      const sendChannel = webrtc.createDataChannel("rtsptowebSendChannel");
+      sendChannel.onopen = () => {
+        console.log(`${sendChannel.label} has opened`);
+        setIsOnline(true);
+        sendChannel.send("ping");
+      };
 
-  //   return () => webrtc.close();
-  // }, [cameraId]);
+      sendChannel.onclose = () => {
+        console.log(`${sendChannel.label} has closed`);
+        setIsOnline(false);
+        startPlay(videoEl, url);
+      };
 
-  const originalWidth = 1280;
-  const originalHeight = 720;
+      sendChannel.onmessage = (event) => {
+        console.log("Message from server:", event.data);
+      };
+    }
+
+    startPlay(videoEl, streamUrl!);
+  }, [streamUrl]);
 
   return (
     <div ref={containerRef} className="relative bg-gray-900 overflow-hidden">
@@ -77,51 +91,19 @@ export default function CameraView({
         autoPlay
         muted
         playsInline
+        controls
+        style={{ maxWidth: "100%", maxHeight: "100%" }}
         className="w-full h-full object-cover"
       />
       <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 p-1 flex justify-between items-center text-xs">
         <span>{location}</span>
-        <span className="bg-red-600 px-1 rounded-sm">LIVE</span>
+        <span className="bg-red-600 px-1 rounded-sm">
+          {isOnline ? "LIVE" : "OFFLINE"}
+        </span>
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 p-1 text-xs">
         {code}
       </div>
-
-      {faces.map((face, idx) => {
-        const [x1, y1, x2, y2] = face.bbox;
-        const x = (x1 / originalWidth) * dimensions.width;
-        const y = (y1 / originalHeight) * dimensions.height;
-        const width = ((x2 - x1) / originalWidth) * dimensions.width;
-        const height = ((y2 - y1) / originalHeight) * dimensions.height;
-
-        const color = face.name === "Unknown" ? "red" : "green";
-
-        return (
-          <div key={idx}>
-            <div
-              className="absolute border-2 z-10"
-              style={{
-                left: `${x}px`,
-                top: `${y}px`,
-                width: `${width}px`,
-                height: `${height}px`,
-                borderColor: color,
-              }}
-            />
-            <div
-              className="absolute text-xs z-20 px-1 font-bold"
-              style={{
-                left: `${x}px`,
-                top: `${y - 18}px`,
-                backgroundColor: color,
-                color: "white",
-              }}
-            >
-              {face.label}
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 }
