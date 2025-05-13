@@ -4,7 +4,7 @@ import EventRow from "@/components/EventRow";
 import { useRealtimeEventData } from "@/hooks/useRealtimeEventData";
 
 export default function CheckInList() {
-  const { data, loading, error } = useRealtimeEventData({ type: "OUT" });
+  const { data, loading, error } = useRealtimeEventData({ status: "OUT" });
 
   if (error) return <p className="text-red-500">Lỗi: {error}</p>;
 

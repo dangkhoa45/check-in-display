@@ -5,7 +5,6 @@ import { useRealtimeEventData } from "@/hooks/useRealtimeEventData";
 
 export default function CheckInList() {
   const { data, loading, error } = useRealtimeEventData({ status: "IN" });
-  console.log("🚀 ~ CheckInList ~ data:", data)
 
   if (error) return <p className="text-red-500">Lỗi: {error}</p>;
 
