@@ -51,7 +51,9 @@ export default function CameraView({
           });
 
           const resultText = await response.text();
-          console.log("SDP answer (encoded):", resultText);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch: ${response.status}`);
+          }
 
           const decodedSDP = atob(resultText);
 
@@ -100,7 +102,13 @@ export default function CameraView({
       />
       <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 p-1 flex justify-between items-center text-xs">
         <span>{location}</span>
-        <span className="bg-red-600 px-1 rounded-sm">
+        <span
+          className={
+            isOnline
+              ? "bg-red-600 px-1 rounded-sm"
+              : "bg-gray-600 px-1 rounded-sm"
+          }
+        >
           {isOnline ? "LIVE" : "OFFLINE"}
         </span>
       </div>
