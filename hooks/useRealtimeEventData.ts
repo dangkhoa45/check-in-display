@@ -1,51 +1,29 @@
 "use client";
 
-import { Alarm } from "@/types/alarm";
-import { CheckInOutEvent } from "@/types/checkInOutEvent";
+import { CheckIn } from "@/types/checkInOutEvent";
 import { useMemo } from "react";
-import { useAlarmList } from "./useAlarmList";
-import { useCheckInOutList } from "./useCheckInOutList";
+import { useCheckList } from "./useCheckList"; 
 import { useEmployees } from "./useEmployeeList";
 
 interface Props {
-  type: "IN" | "OUT";
+  status: "IN" | "OUT";
 }
 
-export const useRealtimeEventData = ({ type }: Props) => {
-  const { data: checkIns, loading, error } = useCheckInOutList({ type });
+export const useRealtimeEventData = ({ status }: Props) => {
+  const { data: checkIns, loading, error } = useCheckList({ status });
   const { data: employees } = useEmployees();
-  const { data: alarmList } = useAlarmList();
-
-  const employeeNames = useMemo(
-    () => new Set(employees.map((e) => e.name)),
-    [employees]
-  );
-
-  const unknownAlarms = useMemo(() => {
-    return (alarmList as Alarm[]).filter(
-      (alarm) =>
-        !employeeNames.has(alarm.name) &&
-        Math.abs(Date.now() - new Date(alarm.timestamp).getTime()) <= 15000
-    );
-  }, [alarmList, employeeNames]);
 
   const mergedData = useMemo(() => {
-    return checkIns.map((event: CheckInOutEvent) => {
-      const employee = employees.find((e) => e.name === event.employee);
+    return checkIns.map((event: CheckIn) => {
+      const employee = employees.find((e) => e.name === event.employee_id);
 
       return {
         ...event,
         employee_name: employee?.employee_name || "Người lạ",
-        custom_image:
-          employee?.custom_face_images1 || event?.custom_image || "",
-        is_unknown: unknownAlarms.some(
-          (alarm) =>
-            alarm.timestamp === event.time ||
-            alarm.timestamp.includes(event.time)
-        ),
+        custom_image: employee?.custom_face_images1 || "",
       };
     });
-  }, [checkIns, employees, unknownAlarms]);
+  }, [checkIns, employees]);
 
   return { data: mergedData, loading, error };
 };

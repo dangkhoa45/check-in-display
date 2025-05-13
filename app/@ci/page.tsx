@@ -4,8 +4,8 @@ import EventRow from "@/components/EventRow";
 import { useRealtimeEventData } from "@/hooks/useRealtimeEventData";
 
 export default function CheckInList() {
-  const { data, loading, error } = useRealtimeEventData({ type: "IN" });
-  
+  const { data, loading, error } = useRealtimeEventData({ status: "IN" });
+  console.log("🚀 ~ CheckInList ~ data:", data)
 
   if (error) return <p className="text-red-500">Lỗi: {error}</p>;
 
@@ -17,7 +17,7 @@ export default function CheckInList() {
         </div>
       )}
       <div className="min-h-[320px]">
-        {data.map((item) => (
+        {data.map((item: any) => (
           <EventRow key={item.name} event={item} />
         ))}
       </div>

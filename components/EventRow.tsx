@@ -1,16 +1,16 @@
-import { CheckInOutEvent } from "@/types/checkInOutEvent";
+import { CheckIn } from "@/types/checkInOutEvent";
 
 interface Props {
-  event: CheckInOutEvent & { is_unknown?: boolean };
+  event: CheckIn & { custom_image: string; employee_name: string };
 }
 
 export default function EventRow({ event }: Props) {
-  const isUnknown = event.is_unknown;
+  const isUnknown = event.is_unknown === "1";
 
   const ppeItems = {
-    giay: Boolean(event.custom_is_boots),
-    gangtay: Boolean(event.custom_is_gloves),
-    aophanquang: Boolean(event.custom_is_vest),
+    giay: Boolean(event.is_boots),
+    gangtay: Boolean(event.is_gloves),
+    aophanquang: Boolean(event.is_vest),
   };
 
   const labelMap: Record<string, string> = {
@@ -20,9 +20,6 @@ export default function EventRow({ event }: Props) {
   };
 
   const ppeStatus = Object.values(ppeItems).every(Boolean) ? "Đầy đủ" : "Thiếu";
-
-  const statusMessage =
-    ppeStatus === "Đầy đủ" ? "Check-in thành công" : "Thiếu đồ bảo hộ";
 
   let bgColor = "bg-gray-900";
   let statusColor = "bg-green-500";
@@ -37,29 +34,32 @@ export default function EventRow({ event }: Props) {
     statusColor = "bg-red-600";
   }
 
-  const renderPPEStatus = (ppeItems: any) => (
-    <div className="flex flex-wrap gap-2 mt-1">
-      {Object.entries(ppeItems).map(([key, value]) => (
-        <div
-          key={key}
-          className="flex items-center gap-1 px-1 py-0.5 rounded text-xs"
-        >
-          <div
-            className={`w-2.5 h-2.5 rounded-full ${
-              value ? "bg-green-500" : "bg-red-500"
-            }`}
-          />
-          <span>{labelMap[key] || key}</span>
-        </div>
-      ))}
-    </div>
-  );
-
-  const formattedTime = new Date(event.time).toLocaleTimeString("vi-VN", {
+  const formattedTime = new Date(event.timestamp).toLocaleTimeString("vi-VN", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
   });
+
+  const renderPPEStatus = (ppeItems: any) => {
+    if (!ppeStatus) return null;
+
+    return (
+      <div className=" bg-opacity-80 p-1 rounded mt-1">
+        <div className="grid grid-cols-3 gap-x-2 gap-y-1">
+          {Object.entries(ppeItems).map(([key, value]) => (
+            <div key={key} className="flex items-center gap-1 px-1 py-0.5 rounded text-xs">
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  value ? "bg-green-500" : "bg-red-500"
+                }`}
+              />
+              <span className="text-xs">{labelMap[key] || key}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div
@@ -70,28 +70,33 @@ export default function EventRow({ event }: Props) {
         <div className="relative w-24 h-24">
           <img
             src={
-              `https://dev4.tadalabs.vn/${event.custom_image}` ||
-              "/placeholder.svg"
+              event.custom_image
+                ? `https://dev4.tadalabs.vn/${event.custom_image}`
+                : "/placeholder.svg"
             }
             alt={event.employee_name}
-            className="w-24 h-24 rounded-full object-cover transform rotate-90"
-          />
-          <div
-            className={`absolute -bottom-0.5 right-3 w-5 h-5 rounded-full border-2 border-gray-900 ${
-              ppeStatus === "Đầy đủ" ? "bg-green-500" : "bg-orange-500"
+            className={`w-24 h-24 rounded-full object-cover ${
+              isUnknown ? "border-4 border-red-500" : ""
             }`}
+          />
+          {isUnknown && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-5xl font-bold text-red-500">X</div>
+            </div>
+          )}
+          <div
+            className={`absolute -bottom-0.5 right-3 w-5 h-5 rounded-full ${statusColor} border-2 border-gray-900`}
           />
         </div>
         <div className="flex flex-col">
           <div className="font-bold text-xl">{event.employee_name}</div>
-          {ppeStatus === "Thiếu" && renderPPEStatus(ppeItems)}
+          {!isUnknown && ppeStatus === "Thiếu" && renderPPEStatus(ppeItems)}
+          {isUnknown && (
+            <div className="text-base font-medium bg-red-700 px-2 py-0.5 inline-block mt-1">
+              Cảnh báo: Người lạ
+            </div>
+          )}
         </div>
-
-        {isUnknown && (
-          <div className="text-sm bg-red-700 px-2 py-0.5 rounded mt-1 inline-block">
-            🚨 Cảnh báo: Người lạ
-          </div>
-        )}
       </div>
     </div>
   );

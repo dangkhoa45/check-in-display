@@ -45,6 +45,7 @@ export type CheckIn = {
   attendance: null;
   late_by: number;
   early_by: number;
+  custom_image: string | "";
 };
 
 export const initialCheckIns: CheckInOutEvent[] = [];
