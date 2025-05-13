@@ -14,7 +14,7 @@ export default function CameraView({
 }: CameraViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const streamUrl = `http://103.82.134.252:8083/stream/${cameraId}/channel/0/webrtc`;
+  const streamUrl = `https://camera.goiliace.engineer/stream/${cameraId}/channel/0/webrtc`;
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
