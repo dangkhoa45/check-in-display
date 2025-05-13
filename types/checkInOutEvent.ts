@@ -30,6 +30,23 @@ export type CheckInOutEvent = {
   shift_actual_end: string | null;
 };
 
+export type CheckIn = {
+  name: string;
+  timestamp: string;
+  camera_id: string;
+  employee_id: string;
+  employee_name: string;
+  is_unknown: string;
+  status: string;
+  is_vest: 0 | 1;
+  is_gloves: 0 | 1;
+  is_boots: 0 | 1;
+  skip_auto_attendance: 0 | 1;
+  attendance: null;
+  late_by: number;
+  early_by: number;
+};
+
 export const initialCheckIns: CheckInOutEvent[] = [];
 
 export const newCheckIns: CheckInOutEvent[] = [];
