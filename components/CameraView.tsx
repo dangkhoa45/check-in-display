@@ -45,6 +45,9 @@ export default function CameraView({
         try {
           const response = await fetch(url, {
             method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
             body: new URLSearchParams({
               data: btoa(webrtc.localDescription?.sdp || ""),
             }),

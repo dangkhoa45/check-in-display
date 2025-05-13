@@ -2,7 +2,7 @@
 
 import { CheckIn } from "@/types/checkInOutEvent";
 import { useMemo } from "react";
-import { useCheckList } from "./useCheckList"; 
+import { useCheckList } from "./useCheckList";
 import { useEmployees } from "./useEmployeeList";
 
 interface Props {

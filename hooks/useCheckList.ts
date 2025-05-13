@@ -37,6 +37,10 @@ export const useCheckList = ({ status }: Props) => {
     };
 
     fetchData();
+
+    const interval = setInterval(fetchData, 5000); // gọi lại mỗi 5s
+    return () => clearInterval(interval);
+
   }, [status]);
 
   return { data, loading, error };
