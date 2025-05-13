@@ -14,12 +14,21 @@ export default function CameraView({
 }: CameraViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const streamUrl = `http://103.82.134.252:8083/stream/${cameraId}/channel/0/webrtc`;
   const [isOnline, setIsOnline] = useState(false);
+  const [streamUrl, setStreamUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!cameraId) return;
+    fetch(`/api/cameras/${cameraId}/url`)
+      .then((res) => res.json())
+      .then((data) => {
+        setStreamUrl(data.streamUrl);
+      });
+  }, [cameraId]);
 
   useEffect(() => {
     const videoEl = videoRef.current;
-    if (!videoEl) return;
+    if (!videoEl || !streamUrl) return;
 
     function startPlay(videoEl: HTMLVideoElement, url: string) {
       const webrtc = new RTCPeerConnection({
@@ -31,7 +40,6 @@ export default function CameraView({
       });
 
       webrtc.ontrack = function (event) {
-        console.log(event.streams.length + " track is delivered");
         videoEl.srcObject = event.streams[0];
         videoEl.play();
       };
@@ -42,36 +50,37 @@ export default function CameraView({
         const offer = await webrtc.createOffer();
         await webrtc.setLocalDescription(offer);
 
-        fetch(url, {
-          method: "POST",
-          body: new URLSearchParams({
-            data: btoa(webrtc.localDescription?.sdp || ""),
-          }),
-        })
-          .then((res) => res.text())
-          .then((data) => {
-            try {
-              webrtc.setRemoteDescription(
-                new RTCSessionDescription({
-                  type: "answer",
-                  sdp: atob(data),
-                })
-              );
-            } catch (e) {
-              console.warn("Set remote description failed", e);
-            }
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            body: new URLSearchParams({
+              data: btoa(webrtc.localDescription?.sdp || ""),
+            }),
           });
+
+          const resultText = await response.text();
+          console.log("SDP answer (encoded):", resultText);
+
+          const decodedSDP = atob(resultText);
+
+          webrtc.setRemoteDescription(
+            new RTCSessionDescription({
+              type: "answer",
+              sdp: decodedSDP,
+            })
+          );
+        } catch (error) {
+          console.error("Negotiation failed:", error);
+        }
       };
 
       const sendChannel = webrtc.createDataChannel("rtsptowebSendChannel");
       sendChannel.onopen = () => {
-        console.log(`${sendChannel.label} has opened`);
         setIsOnline(true);
         sendChannel.send("ping");
       };
 
       sendChannel.onclose = () => {
-        console.log(`${sendChannel.label} has closed`);
         setIsOnline(false);
         startPlay(videoEl, url);
       };
@@ -81,7 +90,7 @@ export default function CameraView({
       };
     }
 
-    startPlay(videoEl, streamUrl!);
+    startPlay(videoEl, streamUrl);
   }, [streamUrl]);
 
   return (
@@ -92,12 +101,17 @@ export default function CameraView({
         muted
         playsInline
         controls
-        style={{ maxWidth: "100%", maxHeight: "100%" }}
         className="w-full h-full object-cover"
       />
       <div className="absolute top-0 left-0 right-0 bg-black bg-opacity-70 p-1 flex justify-between items-center text-xs">
         <span>{location}</span>
-        <span className="bg-red-600 px-1 rounded-sm">
+        <span
+          className={
+            isOnline
+              ? "bg-red-600 px-1 rounded-sm"
+              : "bg-gray-600 px-1 rounded-sm"
+          }
+        >
           {isOnline ? "LIVE" : "OFFLINE"}
         </span>
       </div>
