@@ -52,11 +52,11 @@ export default function EventRow({ event }: Props) {
               className="flex items-center gap-1 px-1 py-0.5 rounded text-xs"
             >
               <div
-                className={`w-3 h-3 rounded-full ${
+                className={`w-6 h-6 rounded-full ${
                   value ? "bg-green-500" : "bg-red-500"
                 }`}
               />
-              <span className="text-xs">{labelMap[key] || key}</span>
+              <span className="text-2xl font-medium">{labelMap[key] || key}</span>
             </div>
           ))}
         </div>
@@ -92,10 +92,10 @@ export default function EventRow({ event }: Props) {
           />
         </div>
         <div className="flex flex-col ml-5">
-          <div className="font-bold text-3xl">{event.employee_name}</div>
+          <div className="font-bold text-4xl">{event.employee_name}</div>
           {!isUnknown && ppeStatus === "Thiếu" && renderPPEStatus(ppeItems)}
           {isUnknown && (
-            <div className="text-base font-medium bg-red-700 px-2 py-0.5 inline-block mt-1">
+            <div className="text-xl font-mono bg-red-700 px-4 py-2 inline-block my-2">
               Cảnh báo: Người lạ
             </div>
           )}
