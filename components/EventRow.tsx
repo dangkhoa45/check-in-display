@@ -68,9 +68,9 @@ export default function EventRow({ event }: Props) {
     <div
       className={`${bgColor} text-white p-2 border-b border-gray-800 flex items-center transition-colors duration-500 flex-1 min-h-0`}
     >
-      <div className="w-1/6 text-base font-mono">{formattedTime}</div>
+      <div className="w-1/6 font-mono text-2xl">{formattedTime}</div>
       <div className="w-5/6 flex items-center gap-3">
-        <div className="relative w-24 h-24">
+        <div className="relative w-28 h-28">
           <img
             src={
               event.custom_image
@@ -78,21 +78,21 @@ export default function EventRow({ event }: Props) {
                 : "/placeholder.svg"
             }
             alt={event.employee_name}
-            className={`w-24 h-24 rounded-full object-cover ${
+            className={`w-28 h-28 rounded-full object-cover ${
               isUnknown ? "border-4 border-red-500" : ""
             }`}
           />
           {isUnknown && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-5xl font-bold text-red-500">X</div>
+              <div className="text-6xl font-bold text-red-500">X</div>
             </div>
           )}
           <div
-            className={`absolute -bottom-0.5 right-3 w-5 h-5 rounded-full ${statusColor} border-2 border-gray-900`}
+            className={`absolute -bottom-1 right-2 w-6 h-6 rounded-full ${statusColor} border-4 border-gray-900`}
           />
         </div>
-        <div className="flex flex-col">
-          <div className="font-bold text-xl">{event.employee_name}</div>
+        <div className="flex flex-col ml-5">
+          <div className="font-bold text-3xl">{event.employee_name}</div>
           {!isUnknown && ppeStatus === "Thiếu" && renderPPEStatus(ppeItems)}
           {isUnknown && (
             <div className="text-base font-medium bg-red-700 px-2 py-0.5 inline-block mt-1">
