@@ -39,35 +39,45 @@ export default function CameraView({
       webrtc.addTransceiver("video", { direction: "sendrecv" });
 
       webrtc.onnegotiationneeded = async function () {
-        const offer = await webrtc.createOffer();
-        await webrtc.setLocalDescription(offer);
-
         try {
+          const offer = await webrtc.createOffer();
+          await webrtc.setLocalDescription(offer);
+
+          const sdp = webrtc.localDescription?.sdp;
+          if (!sdp) throw new Error("SDP is undefined");
+
           const response = await fetch(url, {
             method: "POST",
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
             body: new URLSearchParams({
-              data: btoa(webrtc.localDescription?.sdp || ""),
+              data: btoa(sdp),
             }),
           });
 
           const resultText = await response.text();
+          // console.log("Server response:", resultText);
+
           if (!response.ok) {
-            throw new Error(`Failed to fetch: ${response.status}`);
+            const message = `Failed to fetch: ${response.status} - ${resultText}`;
+            console.warn("Camera stream error:", message);
+
+            setIsOnline(false);
+            return;
           }
 
           const decodedSDP = atob(resultText);
 
-          webrtc.setRemoteDescription(
+          await webrtc.setRemoteDescription(
             new RTCSessionDescription({
               type: "answer",
               sdp: decodedSDP,
             })
           );
-        } catch (error) {
-          console.error("Negotiation failed:", error);
+        } catch (err) {
+          console.error("Negotiation failed:", err);
+          setIsOnline(false);
         }
       };
 
