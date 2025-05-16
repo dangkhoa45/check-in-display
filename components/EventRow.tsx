@@ -47,7 +47,10 @@ export default function EventRow({ event }: Props) {
       <div className=" bg-opacity-80 p-1 rounded mt-1">
         <div className="grid grid-cols-3 gap-x-2 gap-y-1">
           {Object.entries(ppeItems).map(([key, value]) => (
-            <div key={key} className="flex items-center gap-1 px-1 py-0.5 rounded text-xs">
+            <div
+              key={key}
+              className="flex items-center gap-1 px-1 py-0.5 rounded text-xs"
+            >
               <div
                 className={`w-3 h-3 rounded-full ${
                   value ? "bg-green-500" : "bg-red-500"
@@ -63,7 +66,7 @@ export default function EventRow({ event }: Props) {
 
   return (
     <div
-      className={`${bgColor} text-white p-2 border-b border-gray-800 flex items-center transition-colors duration-500`}
+      className={`${bgColor} text-white p-2 border-b border-gray-800 flex items-center transition-colors duration-500 flex-1 min-h-0`}
     >
       <div className="w-1/6 text-base font-mono">{formattedTime}</div>
       <div className="w-5/6 flex items-center gap-3">

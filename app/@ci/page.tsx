@@ -15,7 +15,7 @@ export default function CheckInList() {
           Đang tải dữ liệu...
         </div>
       )}
-      <div className="min-h-[320px]">
+      <div className="flex flex-col h-full">
         {data.map((item: any) => (
           <EventRow key={item.name} event={item} />
         ))}
